@@ -33,13 +33,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
 
+      # Upgraded to Java 25 to satisfy the fabric-loom dependencies
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '25'
 
-      # Uses the authentic gradlew file visible in your directory to build the mod
       - name: Compile Fabric Jar
         run: |
           cd examples/minecraft-gta5-passthrough/mc
