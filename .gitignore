@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 uv.lock
 .env
-build/
+# build/
 dist/
 *.egg-info/
 # captures and scratch
