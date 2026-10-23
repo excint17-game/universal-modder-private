@@ -3,31 +3,31 @@ on: [workflow_dispatch]
 
 jobs:
   build-gta:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Kept on Windows
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Compile ASI Plugin
+      # Runs your bash script using Windows' built-in Git Bash environment
+      - name: Fetch Dependencies
         run: |
-          cd examples/minecraft-gta5-passthrough/gta5-plugin
-          msbuild /p:Configuration=Release /p:Platform=x64 gta5_passthrough.sln
-
-      # Renames the output to a proper .asi extension for the universal modder loader
-      - name: Prepare ASI Extension
-        run: |
-          cd examples/minecraft-gta5-passthrough/gta5-plugin/x64/Release
-          mv gta5_passthrough.dll gta5_passthrough.asi
+          cd examples/minecraft-gta5-passthrough/gta
+          chmod +x fetch_deps.sh
+          ./fetch_deps.sh
         shell: bash
+
+      # Runs your batch file inside the standard Windows Command Prompt
+      - name: Compile GTA Binary
+        run: |
+          cd examples/minecraft-gta5-passthrough/gta
+          .\build.bat
+        shell: cmd
 
       - name: Upload ASI Binary
         uses: actions/upload-artifact@v4
         with:
           name: gta5-legacy-asi
-          path: examples/minecraft-gta5-passthrough/gta5-plugin/x64/Release/gta5_passthrough.asi
+          path: examples/minecraft-gta5-passthrough/gta/build/MCPassthrough.asi
 
   build-minecraft:
     runs-on: ubuntu-latest
@@ -43,16 +43,15 @@ jobs:
 
       - name: Compile Fabric Jar
         run: |
-          cd examples/minecraft-gta5-passthrough/minecraft-mod
-          chmod +x gradlew
-          ./gradlew build
+          cd examples/minecraft-gta5-passthrough/mc
+          chmod +x build.sh
+          ./build.sh
 
-      # Filters out plain/sources jars to only upload the deployment universal mod jar
       - name: Upload Mod Jar
         uses: actions/upload-artifact@v4
         with:
           name: minecraft-legacy-jar
           path: |
-            examples/minecraft-gta5-passthrough/minecraft-mod/build/libs/*.jar
-            !examples/minecraft-gta5-passthrough/minecraft-mod/build/libs/*-plain.jar
-            !examples/minecraft-gta5-passthrough/minecraft-mod/build/libs/*-sources.jar
+            examples/minecraft-gta5-passthrough/mc/build/libs/*.jar
+            !examples/minecraft-gta5-passthrough/mc/build/libs/*-plain.jar
+            !examples/minecraft-gta5-passthrough/mc/build/libs/*-sources.jar
