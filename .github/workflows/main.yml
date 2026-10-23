@@ -1,0 +1,47 @@
+name: Cloud Compile Legacy Binaries
+on: [workflow_dispatch]
+
+jobs:
+  build-gta:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Compile ASI Plugin
+        run: |
+          cd examples/minecraft-gta5-passthrough/gta5-plugin
+          msbuild /p:Configuration=Release /p:Platform=x64 gta5_passthrough.sln
+
+      - name: Upload ASI Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: gta5-legacy-asi
+          path: examples/minecraft-gta5-passthrough/gta5-plugin/x64/Release/gta5_passthrough.dll
+
+  build-minecraft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile Fabric Jar
+        run: |
+          cd examples/minecraft-gta5-passthrough/minecraft-mod
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Upload Mod Jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: minecraft-legacy-jar
+          path: examples/minecraft-gta5-passthrough/minecraft-mod/build/libs/*.jar
